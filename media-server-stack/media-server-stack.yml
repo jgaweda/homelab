@@ -1,0 +1,74 @@
+services:
+
+    plex:
+        container_name: plex
+        image: lscr.io/linuxserver/plex:latest    
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - VERSION=docker
+            - PLEX_CLAIM=claim-LmFutR1Lofk85xeaEZfm
+            - TZ=America/Los_Angeles
+            - NVIDIA_VISIBLE_DEVICES=all
+        runtime: nvidia 
+        ports:
+            - 32400:32400
+        volumes:
+            - /mnt/user/appdata/plex/config:/config
+            - /mnt/user/mediadata:/mediadata
+            - /mnt/user/appdata/plex/transcode:/transcode
+        restart: unless-stopped
+        networks:
+          - dockernetwork
+        labels:
+          - swag:enable
+          
+    tautulli:
+        image: lscr.io/linuxserver/tautulli
+        container_name: tautulli
+        environment:
+          - PUID=99
+          - PGID=100
+          - UMASK=022
+            - TZ=America/Los_Angeles
+        volumes:
+          - /mnt/user/appdata/overseerr/config:/config
+        ports:
+          - 8181:8181
+        restart: unless-stopped
+        labels:
+          - swag:enable
+        networks:
+          - dockernetwork
+
+    emby:
+        container_name: emby
+        image: lscr.io/linuxserver/emby:latest    
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - VERSION=docker
+            - TZ=America/Los_Angeles
+            - NVIDIA_VISIBLE_DEVICES=all
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+        runtime: nvidia 
+        ports:
+            - 8096:8096
+        volumes:
+            - /mnt/user/appdata/emby/config:/config
+            - /mnt/user/mediadata:/mediadata
+            - /mnt/user/appdata/zap2xml/data/:/xmltv
+            - /mnt/user/appdata/emby/transcode:/transcode
+            - /mnt/user/appdata/emby/conversion:/conversion
+        restart: unless-stopped
+        networks:
+          - dockernetwork
+        labels:
+          - swag:enable
+
+networks:
+    dockernetwork:
+        external: true   
+
