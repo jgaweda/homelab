@@ -1,0 +1,240 @@
+services:
+
+    nzbget:
+        container_name: nzbget
+        image: lscr.io/linuxserver/nzbget:latest 
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+        ports:
+            - 6789:6789
+        volumes:
+            - /mnt/user/appdata/nzbget/config:/config
+            - /mnt/user/mediadata/usenet/:/mediadata/usenet
+        restart: unless-stopped
+        networks:
+          - dockernetwork    
+        labels:
+          - swag:enable
+
+    qbittorrent:
+        image: lscr.io/linuxserver/qbittorrent:latest
+        container_name: qbittorrent
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+            - WEBUI_PORT=8180
+        volumes:
+            - /mnt/user/appdata/qbittorrent/config:/config
+            - /mnt/user/mediadata/torrents/:/mediadata/torrents
+        ports:
+          - 8180:8180
+          - 6881:6881
+          - 6881:6881/udp
+        restart: unless-stopped
+        networks:
+          - dockernetwork   
+        labels:
+          - swag:enable
+
+    radarr4k:
+        container_name: radarr4k
+        image: lscr.io/linuxserver/radarr:latest
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+        ports:
+            - 7879:7879
+        volumes:
+            - /mnt/user/mediadata:/mediadata
+            - /mnt/user/mediadata/media/4k/movies:/movies
+            - /mnt/user/appdata/radarr4k/config:/config
+        restart: unless-stopped
+        networks:
+          - dockernetwork    
+        depends_on:
+          - qbittorrent
+          - nzbget
+          - prowlarr
+        labels:
+          - swag:enable
+
+    prowlarr:
+        container_name: prowlarr
+        image: lscr.io/linuxserver/prowlarr:develop    
+        environment:
+          - PUID=99
+          - PGID=100
+          - UMASK=022
+          - TZ=America/Los_Angeles
+        ports:
+            - 9696:9696
+        volumes:
+            - /mnt/user/appdata/prowlarr/config:/config
+        restart: unless-stopped
+        networks:
+          - dockernetwork   
+        labels:
+          - swag:enable
+        depends_on:
+          - qbittorrent
+          - nzbget
+
+    lidarr:
+        container_name: lidarr
+        image: lscr.io/linuxserver/lidarr:latest
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+        ports:
+            - 8686:8686
+        volumes:
+            - /mnt/user/mediadata:/mediadata
+            - /mnt/user/mediadata/media/music:/music
+            - /mnt/user/appdata/lidarr/config:/config
+        restart: unless-stopped
+        networks:
+          - dockernetwork  
+        labels:
+          - swag:enable
+        depends_on:
+          - qbittorrent
+          - nzbget
+          - prowlarr
+
+    radarr:
+        container_name: radarr
+        image: lscr.io/linuxserver/radarr:latest
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+        ports:
+            - 7878:7878
+        volumes:
+            - /mnt/user/mediadata:/mediadata
+            - /mnt/user/mediadata/media/movies:/movies
+            - /mnt/user/appdata/radarr/config:/config
+        restart: unless-stopped
+        networks:
+          - dockernetwork    
+        labels:
+          - swag:enable
+        depends_on:
+          - qbittorrent
+          - nzbget
+          - prowlarr
+
+    sonarr:
+        container_name: sonarr
+        image: lscr.io/linuxserver/sonarr:latest
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+        ports:
+            - 8989:8989
+        volumes:
+            - /mnt/user/mediadata:/mediadata
+            - /mnt/user/mediadata/media/tv:/tv
+            - /mnt/user/appdata/sonarr/config:/config
+        restart: unless-stopped
+        networks:
+          - dockernetwork
+        labels:
+          - swag:enable
+        depends_on:
+          - qbittorrent
+          - nzbget
+          - prowlarr
+          
+    flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        container_name: flaresolverr
+        environment:
+          - LOG_LEVEL=${LOG_LEVEL:-info}
+          - LOG_HTML=${LOG_HTML:-false}
+          - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+          - TZ=America/Los_Angeles
+        ports:
+          - "${PORT:-8191}:8191"
+        restart: unless-stopped 
+        networks:
+          - dockernetwork
+        
+    overseerr:
+        image: lscr.io/linuxserver/overseerr
+        container_name: overseerr
+        environment:
+            - PUID=99
+            - PGID=100
+            - UMASK=022
+            - TZ=America/Los_Angeles
+        volumes:
+          - /mnt/user/appdata/overseerr/config:/config
+        ports:
+          - 5055:5055
+        restart: unless-stopped
+        labels:
+          - swag:enable
+        networks:
+          - dockernetwork
+  
+    readarr:
+        image: lscr.io/linuxserver/readarr:develop
+        container_name: readarr
+        environment:
+          - PUID=99
+          - PGID=100
+          - UMASK=022
+          - TZ=America/Los_Angeles
+        volumes:
+          - /mnt/user/appdata/readarr/config/:/config
+          - /mnt/user/mediadata/:/mediadata
+        ports:
+          - 8787:8787
+        restart: unless-stopped
+        labels:
+          - swag:enable
+        networks:
+          - dockernetwork
+
+    fileflows:
+        container_name: fileflows
+        image: revenz/fileflows:latest
+        restart: unless-stopped
+        network_mode: bridge
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - capabilities: [gpu]
+        environment:
+          TZ: America/Los_Angeles
+          PUID: 99
+          PGID: 100
+          VERSION: latest
+          NVIDIA_VISIBLE_DEVICES: all
+          NVIDIA_DRIVER_CAPABILITIES: compute,video,utility      
+        ports:
+          - 5000:5000
+        volumes:
+          - /mnt/user/appdata/fileflows/app/data:/app/Data
+          - /mnt/user/appdata/fileflows/app/logs:/app/Logs
+          - /mnt/user/appdata/fileflows/temp:/temp
+          - /mnt/user/mediadata/media:/media
+
+          
+networks:
+  dockernetwork:
+    external: true  
