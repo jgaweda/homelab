@@ -1,0 +1,22 @@
+services:
+  loog:
+    image: lscr.io/linuxserver/nginx:latest
+    container_name: loog
+    environment:
+      - PUID=99
+      - PGID=100
+      - TZ=America/Los_Angeles
+    volumes:
+      - /mnt/user/appdata/loog/config:/config
+    ports:
+      - 8983:8983
+      - 8943:8943
+    restart: unless-stopped
+    networks:
+      - dockernetwork    
+    labels:
+      - swag:enable
+      
+networks:
+  dockernetwork:
+    external: true  

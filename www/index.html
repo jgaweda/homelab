@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Joshua Gaweda</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<?php $cssVersion = "0.0.4"; ?>
+		<link rel="stylesheet" href="assets/css/main.css?v=<?php echo $cssVersion; ?>" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css?v=<?php echo $cssVersion; ?>" /></noscript>
+	</head>
+	<body class="is-preload">
+		<div id="wrapper">
+			<div id="bg"></div>
+			<div id="overlay"></div>
+			<div id="main">
+				<!-- Header -->
+					<header id="header">
+						<h1>Joshua Gaweda</h1>
+						<p>Technical Program Manager &nbsp;&bull;&nbsp; Embedded Software Engineer</p>
+						<nav>
+							<ul>
+								<li><a href="https://www.linkedin.com/in/joshuagaweda" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<!--<li><a href="https://github.com/jgaweda" class="icon brands fa-github"><span class="label">Github</span></a></li>-->
+								<li><a href="mailto:josh@gaweda.io" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+							</ul>
+						</nav>
+						<p><a href="resume.html">View My Resume</a></p>
+					</header>
+			</div>
+		</div>
+		<script>
+			window.onload = function() { document.body.classList.remove('is-preload'); }
+			window.ontouchmove = function() { return false; }
+			window.onorientationchange = function() { document.body.scrollTop = 0; }
+		</script>
+	</body>
+</html>
